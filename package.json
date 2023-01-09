@@ -1,0 +1,13 @@
+{
+  "name": "com.bladesero.volumetric",
+  "displayName": "URP volumetric render feature",
+  "version": "0.1.5",
+  "unity": "2021.3",
+  "description": "A render feature to recover Unity 5.x's offical volumetric fog in Adam demo",
+  "keywords": [
+    "Volumetric","Rendering"
+  ],
+  "dependencies": {
+    "com.unity.render-pipelines.universal": "12.1.2"
+  }
+}
