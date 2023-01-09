@@ -4,7 +4,7 @@
 A render feature to recover Unity 5.x's offical volumetric fog in Adam demo
 - [x] URP 12
 - [x] URP 10
-- [] URP 7
+- [ ] URP 7
 
 Directional light,point light,spot light type has been supported.And it also include costant fog,height fog.
 
