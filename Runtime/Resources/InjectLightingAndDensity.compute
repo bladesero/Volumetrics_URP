@@ -17,6 +17,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
+#define MIEG 0.5f
 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
 
 RWTexture3D<half4> _VolumeInject;
@@ -63,6 +64,8 @@ RWStructuredBuffer<ShadowParams> _ShadowParams;
 Texture2D _DirectionalShadowmap;
 SamplerState sampler_DirectionalShadowmap;
 //Texture2D _MainLightShadowmap;
+float _MieG;
+float _SunFogDensity;
 #endif
 #endif
 
@@ -228,7 +231,10 @@ float Density(float3 pos)
 {
 	float fog = _FogParams.x;
 
+	//Height fog,move to PS for infinity distance
+
 	fog += max(exp(_FogParams.y*(-pos.y + _FogParams.z)) * _FogParams.w, 0.0);
+	//fog *= max(exp(_FogParams.y*(-pos.y + _FogParams.z)) * _FogParams.w, 0.0);
 
 	float3 warp = pos;
 
@@ -415,6 +421,11 @@ float3 DirectionalLight(float3 pos)
 	return _DirLightColor * att;
 }
 
+float MieScattering(float cosAngle, float4 g)
+{
+    return g.w * (g.x / (pow(abs(g.y - g.z * cosAngle), 1.5)));			
+}
+
 float3 DirectionalLightURP(float3 pos)
 {
 	if (!any(_MainLightColor))
@@ -432,13 +443,20 @@ float3 DirectionalLightURP(float3 pos)
 	}
 	#endif
 
-	#if ANISOTROPY
-	float3 posToCamera = normalize(_CameraPos.xyz - pos);
-	float costheta = dot(posToCamera, _MainLightPosition.xyz);
-	att *= anisotropy(costheta);
-	#endif
+	//#if ANISOTROPY
+	//float3 posToCamera = normalize(_CameraPos.xyz - pos);
+	//float costheta = dot(posToCamera, _MainLightPosition.xyz);
+	//att *= anisotropy(costheta);
+	//#endif
 
-	return _MainLightColor.rgb * att*_MainLightShadowParams.x;
+	//Phase Function Mie G
+	float3 posToCamera = normalize(_CameraPos.xyz - pos);
+	float cosAngle = dot(_MainLightPosition.xyz, -posToCamera);
+	// x: 1 - g^2, y: 1 + g^2, z: 2*g, w: 1/4pi
+	float4 mieG=float4(1 - (_MieG * _MieG), 1 + (_MieG * _MieG), 2 * _MieG, 1.0f / (4.0f * 3.1415926));
+	float MieGScatter=MieScattering(cosAngle, mieG);//MieG=0.1
+
+	return _MainLightColor.rgb * att*_MainLightShadowParams.x*MieGScatter*_SunFogDensity;
 }
 #endif
 
@@ -549,6 +567,7 @@ float3 AreaLights(float3 pos)
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float3 color = _AmbientLight;//Abient Color
+	//float3 color = float3(0,0,0);//Abient Color
 	float2 uv = float2(id.x/159.0, id.y/89.0);
 	float z = id.z/(_ZSlice-1.0);
 	z = _NearOverFarClip + z * (1 - _NearOverFarClip);
@@ -578,10 +597,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	// Density
 	float density = Density(pos);
 
+	float extinction=density*0.2;
+
 	// Directional light
 	#ifdef DIR_LIGHT
-	color += DirectionalLightURP(pos)*_AmbientLight;
+	float3 dirColor = DirectionalLightURP(pos);
+	color += dirColor;
+	extinction+=dirColor*0.2;
 	#endif
+
+	extinction=exp(-extinction);
 
 	// Output
 	float4 output;

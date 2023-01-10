@@ -113,7 +113,7 @@ namespace UnityEngine.Rendering.Universal
             }
 
             // TODO: try a constant buffer with setfloats instead for perf
-            cmd.SetBufferData(m_PointLightParamsCB, m_PointLightParams);
+            cmd.SetComputeBufferData(m_PointLightParamsCB, m_PointLightParams);
             cmd.SetComputeBufferParam(m_InjectLightingAndDensity, kernel, "_PointLights", m_PointLightParamsCB);
         }
 
@@ -155,7 +155,7 @@ namespace UnityEngine.Rendering.Universal
 
             // TODO: try a constant buffer with setfloats instead for perf
             //m_SpotLightParamsCB.SetData(m_SpotLightParams);
-            cmd.SetBufferData(m_SpotLightParamsCB, m_SpotLightParams);
+            cmd.SetComputeBufferData(m_SpotLightParamsCB, m_SpotLightParams);
             cmd.SetComputeBufferParam(m_InjectLightingAndDensity, kernel, "_SpotLights", m_SpotLightParamsCB);
         }
 
@@ -381,6 +381,8 @@ namespace UnityEngine.Rendering.Universal
             m_InjectLightingAndDensity.SetFloats("_FogParams", m_fogParams);
             m_InjectLightingAndDensity.SetFloat("_NearOverFarClip", cam.nearClipPlane / cam.farClipPlane);
             m_InjectLightingAndDensity.SetVector("_AmbientLight", volumetric.AmbientColor.value);
+            m_InjectLightingAndDensity.SetFloat("_SunFogDensity", volumetric.SunDensity.value);
+            m_InjectLightingAndDensity.SetFloat("_MieG", volumetric.MieG.value);
             m_InjectLightingAndDensity.SetFloat("_ZSlice", (float)ZSlice);
         }
 

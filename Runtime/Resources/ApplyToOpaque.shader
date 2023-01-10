@@ -76,6 +76,7 @@ HLSLPROGRAM
         //Stop Nan
         col.rgb=min(col.rgb,float3(100,100,100));
         return col;
+        //return fog.a;
 	}
 
 ENDHLSL

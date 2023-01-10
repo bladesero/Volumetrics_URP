@@ -23,11 +23,15 @@ namespace UnityEngine.Rendering.Universal
         [Tooltip("Height Fog Exponent")]
         public ClampedFloatParameter HeightFogExponent = new ClampedFloatParameter(0.125f, 0.0f, 1.0f);
         [Tooltip("Height Fog Height Offset")]
-        public ClampedFloatParameter HeightFogOffset = new ClampedFloatParameter(0.0f, 0.0f, 100.0f);
+        public ClampedFloatParameter HeightFogOffset = new ClampedFloatParameter(0.0f, -100.0f, 100.0f);
         [Tooltip("Anisotropy Scatter")]
         public ClampedFloatParameter Anisotropy = new ClampedFloatParameter(0.5f, 0.0f, 0.98f);
         [Tooltip("Fog Ambient Color")]
         public ColorParameter AmbientColor = new ColorParameter(new Color(0.23f, 0.63f, 1.0f));
+
+        [Header("MainLightParams")]
+        public ClampedFloatParameter SunDensity = new ClampedFloatParameter(1.0f, 0.0f, 30.0f);
+        public ClampedFloatParameter MieG = new ClampedFloatParameter(0.5f, 0.0f, 1.0f);
 
         Volumetric()
         {
