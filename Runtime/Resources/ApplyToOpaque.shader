@@ -17,11 +17,18 @@ HLSLPROGRAM
     #include "Packages/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl"
 	#include"Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 	#include "VolumetricFog.hlsl"
+	#include "ExponentHeightFog.hlsl"
 	#pragma vertex FullscreenVert
 	#pragma fragment frag
 
 	TEXTURE2D_X(_VolumeSourceTex);
     SAMPLER(sampler_VolumeSourceTex);
+
+	float3 _inscatteringColor;
+    float  _maxOpacity;
+    float  _density;
+    float  _height;
+    float  _cutoffDistance;
 
 	//struct Attributes
  //   {
@@ -69,14 +76,23 @@ HLSLPROGRAM
 		half linear01Depth = Linear01Depth(depth,_ZBufferParams);
 		half4 fog = Fog(linear01Depth, uv);
 
+		//FogData fogData=0;
+
+		////Init fogdata
+		//fogData.inscatteringColor;
+		//fogData.maxOpacity;
+		//fogData.density;
+		//fogData.height;
+		//fogData.cutoffDistance;
+
+		//half4 farHeightFog=ApplyExponentialHeightFog(uv,depth,fogData)
+
+
         half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv)* fog.a + fog;
-        //half4 col = fog;
-        //half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv);
 
         //Stop Nan
         col.rgb=min(col.rgb,float3(100,100,100));
         return col;
-        //return fog.a;
 	}
 
 ENDHLSL
