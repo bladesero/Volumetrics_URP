@@ -90,9 +90,10 @@ HLSLPROGRAM
 		fogData.heightFalloff=_HeightFalloff;
 
 		half4 farHeightFog=ApplyExponentialHeightFog(uv,depth,fogData);
+		
 
-
-        half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv)* fog.a + fog + farHeightFog;
+        half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv)* fog.a + fog;
+		col=col* farHeightFog.a+ farHeightFog;
 
         //Stop Nan,but how to keep color,maybe rgb to hsv
         col.rgb=min(col.rgb,float3(50,50,50));
