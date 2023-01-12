@@ -20,6 +20,8 @@ namespace UnityEngine.Rendering.Universal
         public ClampedFloatParameter ConstantFogDensity = new ClampedFloatParameter(1.0f, 0.0f, 2.0f);
         [Tooltip("Height Fog Density")]
         public ClampedFloatParameter HeightFogDensity = new ClampedFloatParameter(1.0f, 0.0f, 3.0f);
+        [Tooltip("Second Height Fog Density for far Object")]
+        public ClampedFloatParameter SecondHeightFogDensity = new ClampedFloatParameter(0.01f, 0.0f, 0.02f);
         [Tooltip("Height Fog Exponent")]
         public ClampedFloatParameter HeightFogExponent = new ClampedFloatParameter(0.125f, 0.0f, 1.0f);
         [Tooltip("Height Fog Height Offset")]

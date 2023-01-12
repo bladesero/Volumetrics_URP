@@ -24,11 +24,13 @@ HLSLPROGRAM
 	TEXTURE2D_X(_VolumeSourceTex);
     SAMPLER(sampler_VolumeSourceTex);
 
-	float3 _inscatteringColor;
-    float  _maxOpacity;
-    float  _density;
-    float  _height;
-    float  _cutoffDistance;
+	float3 _InscatteringColor;
+    float  _MaxOpacity;
+    float  _Density;
+    float  _Height;
+    float  _CutoffDistance;
+    float  _StartDistance;
+    float  _HeightFalloff;
 
 	//struct Attributes
  //   {
@@ -76,22 +78,24 @@ HLSLPROGRAM
 		half linear01Depth = Linear01Depth(depth,_ZBufferParams);
 		half4 fog = Fog(linear01Depth, uv);
 
-		//FogData fogData=0;
+		FogData fogData=(FogData)0;
 
-		////Init fogdata
-		//fogData.inscatteringColor;
-		//fogData.maxOpacity;
-		//fogData.density;
-		//fogData.height;
-		//fogData.cutoffDistance;
+		//Init fogdata
+		fogData.inscatteringColor=_InscatteringColor;
+		fogData.maxOpacity=_MaxOpacity;
+		fogData.density=_Density;
+		fogData.height=_Height;
+		fogData.cutoffDistance=_CutoffDistance;
+		fogData.startDistance=_StartDistance;
+		fogData.heightFalloff=_HeightFalloff;
 
-		//half4 farHeightFog=ApplyExponentialHeightFog(uv,depth,fogData)
+		half4 farHeightFog=ApplyExponentialHeightFog(uv,depth,fogData);
 
 
-        half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv)* fog.a + fog;
+        half4 col = SAMPLE_TEXTURE2D_X(_VolumeSourceTex, sampler_VolumeSourceTex, uv)* fog.a + fog + farHeightFog;
 
-        //Stop Nan
-        col.rgb=min(col.rgb,float3(100,100,100));
+        //Stop Nan,but how to keep color,maybe rgb to hsv
+        col.rgb=min(col.rgb,float3(50,50,50));
         return col;
 	}
 

@@ -11,7 +11,7 @@ public abstract class LightOverride : MonoBehaviour
 	public enum Type{None, Point, Spot, Tube, Area, Directional}
 
 	Type m_Type = Type.None;
-	bool m_Initialized = false;
+	internal bool m_Initialized = false;
 	Light m_Light;
 
 	public bool isOn
@@ -48,7 +48,7 @@ public abstract class LightOverride : MonoBehaviour
 
 	public abstract bool GetForceOn();
 
-	void Init()
+	internal void Init()
 	{
 		if (m_Initialized)
 			return;

@@ -241,17 +241,10 @@ namespace UnityEngine.Rendering.Universal
                 Scatter(cmd, camera);
                 //Draw to Screen
                 RenderTextureDescriptor opaqueDesc = data.cameraData.cameraTargetDescriptor;
-                
+
 
                 //Combine.SetTexture("_MainTex");
-                cmd.SetGlobalTexture("_VolumeScatter", VolumeScatterID);
-                cmd.SetGlobalTexture("_VolumeSourceTex", m_TemporaryColorTexture.Identifier());
-                Combine.SetVector("_Screen_TexelSize", new Vector4(1.0f / opaqueDesc.width, 1.0f / opaqueDesc.height, opaqueDesc.width, opaqueDesc.height));
-                Combine.SetVector("_VolumeScatter_TexelSize", new Vector4(1.0f / m_VolumeResolution.x, 1.0f / m_VolumeResolution.y, 1.0f / ZSlice, 0));
-                Combine.SetFloat("_CameraFarOverMaxFar", camera.farClipPlane / volumetric.Distance.value);
-                Combine.SetFloat("_NearOverFarClip", 0.3f/*fixed NearClip*/ / volumetric.Distance.value);
-                cmd.Blit(data.cameraData.renderer.cameraColorTarget, m_TemporaryColorTexture.Identifier());
-                cmd.Blit(m_TemporaryColorTexture.Identifier(), source, Combine, 0);
+                CombinewithSecondHeightFog(cmd, data, camera, opaqueDesc);
 
                 context.ExecuteCommandBuffer(cmd);
                 CommandBufferPool.Release(cmd);
@@ -399,6 +392,28 @@ namespace UnityEngine.Rendering.Universal
             cmd.SetComputeTextureParam(m_Scatter, 0, "_VolumeScatter", VolumeScatterID);
             cmd.SetComputeFloatParam(m_Scatter, "_ZSlice", (float)ZSlice);
             cmd.DispatchCompute(m_Scatter,0, m_VolumeResolution.x / m_ScatterNumThreads.x, m_VolumeResolution.y / m_ScatterNumThreads.y, 1);
+        }
+
+        void CombinewithSecondHeightFog(CommandBuffer cmd, RenderingData data,Camera camera, RenderTextureDescriptor descriptor)
+        {
+            //Set params
+            cmd.SetGlobalTexture("_VolumeScatter", VolumeScatterID);
+            cmd.SetGlobalTexture("_VolumeSourceTex", m_TemporaryColorTexture.Identifier());
+            Combine.SetVector("_Screen_TexelSize", new Vector4(1.0f / descriptor.width, 1.0f / descriptor.height, descriptor.width, descriptor.height));
+            Combine.SetVector("_VolumeScatter_TexelSize", new Vector4(1.0f / m_VolumeResolution.x, 1.0f / m_VolumeResolution.y, 1.0f / ZSlice, 0));
+            Combine.SetFloat("_CameraFarOverMaxFar", camera.farClipPlane / volumetric.Distance.value);
+            Combine.SetFloat("_NearOverFarClip", 0.3f/*fixed NearClip*/ / volumetric.Distance.value);
+
+            //SecondFog param
+            Combine.SetColor("_InscatteringColor", volumetric.AmbientColor.value);
+            Combine.SetFloat("_MaxOpacity", 1.0f);
+            Combine.SetFloat("_Density", volumetric.SecondHeightFogDensity.value);
+            Combine.SetFloat("_Height", volumetric.HeightFogOffset.value);
+            Combine.SetFloat("_StartDistance", volumetric.Distance.value);
+            Combine.SetFloat("_HeightFalloff", volumetric.HeightFogExponent.value);
+            //Blit
+            cmd.Blit(data.cameraData.renderer.cameraColorTarget, m_TemporaryColorTexture.Identifier());
+            cmd.Blit(m_TemporaryColorTexture.Identifier(), source, Combine, 0);
         }
 
         int VolumetricQuality(Volumetric.FogQuality fogQuality)

@@ -42,6 +42,7 @@ public partial class FogLight : LightOverride
 
 	void OnEnable()
 	{
+		base.Init();
 		AddToLightManager();
 	}
 
@@ -53,6 +54,7 @@ public partial class FogLight : LightOverride
 
 	void OnDisable()
 	{
+		this.m_Initialized = false;
 		LightManagerFogLights.Remove(this);
 		m_AddedToLightManager = false;
 		//CleanupDirectionalShadowmap();
